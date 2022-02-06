@@ -58,7 +58,7 @@ def answer_listen(snapshot, changes, read_time):
 
     for change in changes:
         if change.type.name == "MODIFIED" and 'answer' in change.document.to_dict():
-            data = change.document.to_dict["answer"]
+            data = change.document.to_dict()["answer"]
             receiver_listen_port = data['listening_port']
             receive_answer.set()
 
@@ -67,29 +67,33 @@ def main_thread():
     db.collection(u'offers').on_snapshot(offer_listen)
     print("Listening to offers...")
 
-    while True:
-        receiver_ip = input("Enter IP: ")
-        punch_port = int(input("Enter port to be punched: "))
-        offer = {
-            'sender_ip': PUBLIC_IP,
-            'receiver_ip': receiver_ip,
-            'punch_port': punch_port
-        }
+    receiver_ip = input("Enter IP: ")
+    punch_port = int(input("Enter port to be punched: "))
 
-        doc_ref = db.collection(u'offers').add({"offer": offer})
-        print(f"Offer sent to {receiver_ip}. Listening for answer...")
-        db.collection(u'offers').document(doc_ref[1].id).on_snapshot(answer_listen)
-        receive_answer.wait()
-
-        print(f"Answer received. Attempt communication on remote port {receiver_listen_port}")
-        receive_answer.clear()
-
-        sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        sock.bind(('0.0.0.0', punch_port))
-
+    if receiver_ip == '' or punch_port == '':
         while True:
-            msg = input(f"Sending message to {receiver_ip}: ")
-            sock.sendto(msg.encode(), (receiver_ip, receiver_listen_port))
+            pass
+
+    offer = {
+        'sender_ip': PUBLIC_IP,
+        'receiver_ip': receiver_ip,
+        'punch_port': punch_port
+    }
+
+    doc_ref = db.collection(u'offers').add({"offer": offer})
+    print(f"Offer sent to {receiver_ip}. Listening for answer...")
+    db.collection(u'offers').document(doc_ref[1].id).on_snapshot(answer_listen)
+    receive_answer.wait()
+
+    print(f"Answer received. Attempt communication on remote port {receiver_listen_port}")
+    receive_answer.clear()
+
+    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    sock.bind(('0.0.0.0', punch_port))
+
+    while True:
+        msg = input(f"Sending message to {receiver_ip}: ")
+        sock.sendto(msg.encode(), (receiver_ip, receiver_listen_port))
 
 
 main_thread()
