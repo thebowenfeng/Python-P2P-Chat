@@ -7,14 +7,16 @@ dport = int(input("Enter destination port number: "))
 
 print("Punching hole")
 
-sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 sock.bind(('0.0.0.0', sport))
 sock.sendto(b'0', (ip, dport))
 
 print("Hole punched")
 
+
 def listen():
-    sock2 = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    sock2 = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     sock2.bind(('0.0.0.0', sport))
 
     while True:
@@ -25,7 +27,7 @@ def listen():
 listener = threading.Thread(target=listen, daemon=True)
 listener.start()
 
-sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 sock.bind(('0.0.0.0', dport))
 
 while True:
