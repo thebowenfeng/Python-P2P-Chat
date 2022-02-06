@@ -70,7 +70,7 @@ def main_thread():
     receiver_ip = input("Enter IP: ")
     punch_port = int(input("Enter port to be punched: "))
 
-    if receiver_ip == '' or punch_port == '':
+    if receiver_ip == '' or punch_port == 0:
         while True:
             pass
 
