@@ -25,7 +25,7 @@ def listen(port, sender_ip):
 
 def offer_listen(snapshot, changes, read_time):
     for change in changes:
-        if change.type.name == "ADDED" and 'offer' in change.document.to_dict():
+        if change.type.name == "ADDED" and 'offer' in change.document.to_dict() and 'answer' not in change.document.to_dict():
             data = change.document.to_dict()['offer']
             if data['receiver_ip'] == PUBLIC_IP:
                 print(f"Connection offer received from {data['sender_ip']}. Port to be punched: {data['punch_port']}")
