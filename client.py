@@ -5,32 +5,34 @@ sport = int(input("Enter source port number: "))
 ip = input("Enter destination IP address")
 dport = int(input("Enter destination port number: "))
 
-print("Punching hole")
+print('punching hole')
 
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 sock.bind(('0.0.0.0', sport))
 sock.sendto(b'0', (ip, dport))
+sock.close()
 
-print("Hole punched")
+print('ready to exchange messages\n')
 
-
+# listen for
+# equiv: nc -u -l 50001
 def listen():
-    sock2 = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    sock2.bind(('0.0.0.0', sport))
+    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    sock.bind(('127.0.0.1', sport))
 
     while True:
-        data, addr = sock2.recvfrom(1024)
-        print(data.decode())
+        data = sock.recv(1024)
+        print('\rpeer: {}\n> '.format(data.decode()), end='')
 
-
-listener = threading.Thread(target=listen, daemon=True)
+listener = threading.Thread(target=listen, daemon=True);
 listener.start()
 
+# send messages
+# equiv: echo 'xxx' | nc -u -p 50002 x.x.x.x 50001
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 sock.bind(('0.0.0.0', dport))
 
 while True:
-    msg = input("> ")
-    sock.sendto(msg.encode(), ("194.193.55.245", sport))
+    msg = input('> ')
+    sock.sendto(msg.encode(), (ip, sport))
 
