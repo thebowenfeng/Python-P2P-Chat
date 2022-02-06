@@ -11,6 +11,7 @@ firebase_admin.initialize_app(cred)
 db = firestore.client()
 
 PUBLIC_IP = requests.get('https://api.ipify.org').text
+print(f"Public IP: {PUBLIC_IP}")
 
 
 def listen(port, sender_ip):
